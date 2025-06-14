@@ -1,73 +1,105 @@
-# Welcome to your Lovable project
 
-## Project info
+# Average Calculator HTTP Microservice
 
-**URL**: https://lovable.dev/projects/3ded4d99-42ef-4400-b0ec-dd9031d4e774
+A REST API microservice that fetches qualified numbers from third-party APIs and maintains a sliding window average calculation.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Qualified Number IDs**: Supports 'p' (prime), 'f' (fibonacci), 'e' (even), 'r' (random)
+- **Sliding Window**: Configurable window size (default: 10)
+- **Third-party Integration**: Fetches from evaluation-service APIs
+- **Response Time Optimization**: < 500ms response guarantee
+- **Duplicate Handling**: Filters duplicate numbers automatically
+- **Error Resilience**: Handles timeouts and API failures gracefully
 
-**Use Lovable**
+## Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3ded4d99-42ef-4400-b0ec-dd9031d4e774) and start prompting.
+1. **Start the Backend Server**:
+   ```bash
+   node src/server/index.js
+   ```
+   Server runs on `http://localhost:9876`
 
-Changes made via Lovable will be committed automatically to this repo.
+2. **View the Frontend**:
+   ```bash
+   npm run dev
+   ```
+   Frontend runs on `http://localhost:8080`
 
-**Use your preferred IDE**
+## API Endpoints
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Fetch Numbers
+```
+GET /numbers/{numberid}
 ```
 
-**Edit a file directly in GitHub**
+**Supported Number IDs**:
+- `p` - Prime numbers
+- `f` - Fibonacci numbers  
+- `e` - Even numbers
+- `r` - Random numbers
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**Example Request**:
+```bash
+curl http://localhost:9876/numbers/e
+```
 
-**Use GitHub Codespaces**
+**Example Response**:
+```json
+{
+  "windowPrevState": [],
+  "windowCurrState": [2, 4, 6, 8],
+  "numbers": [2, 4, 6, 8],
+  "avg": 5.00
+}
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Health Check
+```
+GET /health
+```
 
-## What technologies are used for this project?
+### Reset Window
+```
+POST /reset
+```
 
-This project is built with:
+## Test Cases
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The microservice includes comprehensive test scenarios:
 
-## How can I deploy this project?
+1. **First Request** - Empty window state
+2. **Subsequent Requests** - Window management and overflow handling
+3. **Duplicate Filtering** - Ensures unique numbers only
+4. **Timeout Handling** - Graceful handling of slow APIs
+5. **Error Recovery** - Maintains service availability
 
-Simply open [Lovable](https://lovable.dev/projects/3ded4d99-42ef-4400-b0ec-dd9031d4e774) and click on Share -> Publish.
+## Architecture
 
-## Can I connect a custom domain to my Lovable project?
+- **Backend**: Express.js with CORS support
+- **Frontend**: React with TypeScript
+- **Storage**: In-memory sliding window
+- **APIs**: Integration with evaluation-service endpoints
+- **Error Handling**: Timeout protection and fallback responses
 
-Yes, you can!
+## Configuration
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- **Window Size**: 10 (configurable in server code)
+- **Timeout**: 500ms for third-party API calls
+- **Port**: 9876 (microservice standard)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Third-party APIs
+
+The service integrates with these evaluation-service endpoints:
+- Prime: `http://20.244.56.144/evaluation-service/primes`
+- Fibonacci: `http://20.244.56.144/evaluation-service/fibo`
+- Even: `http://20.244.56.144/evaluation-service/even`
+- Random: `http://20.244.56.144/evaluation-service/rand`
+
+## Technologies Used
+
+- **Backend**: Node.js, Express.js, node-fetch
+- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
+- **Build Tool**: Vite
+- **State Management**: React hooks
+- **HTTP Client**: Fetch API with timeout handling
